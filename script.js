@@ -1,3 +1,5 @@
+const cartList = document.querySelector('.cart__items');
+
 const createProductImageElement = (imageSource) => {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -26,8 +28,34 @@ const createProductItemElement = ({ sku, name, image }) => {
 
 const getSkuFromProductItem = (item) => item.querySelector('span.item__sku').innerText;
 
+const updateTotalPrice = () => {
+  const valueElement = document.querySelector('.total-price');
+  let totalValue = 0;
+  cartList.childNodes.forEach((item) => {
+    const itemString = item.innerHTML.split(' ');
+    const value = itemString[itemString.length - 1].substring(1);
+    totalValue += parseFloat(value, 10);
+  });
+  valueElement.innerHTML = Math.round(totalValue * 100) / 100;
+};
+
+const updateLocalStorage = () => {
+  saveCartItems(cartList.innerHTML);
+};
+
 const cartItemClickListener = (event) => {
   event.target.remove();
+  updateLocalStorage();
+  updateTotalPrice();
+};
+
+const getFromLocalStorage = () => {
+  const savedList = localStorage.getItem('cartItems');
+  cartList.innerHTML = savedList;
+  cartList.childNodes.forEach((item) => {
+    item.addEventListener('click', cartItemClickListener);
+  }); 
+  updateTotalPrice();
 };
 
 const createCartItemElement = ({ sku, name, salePrice }) => {
@@ -56,7 +84,6 @@ const addToCartListener = () => {
 
   addToCartButton.forEach((button) => {
     button.addEventListener('click', async (event) => {
-      const cartList = document.querySelector('.cart__items');
       const item = event.target.parentElement;
       const itemId = getSkuFromProductItem(item);
       const itemInfo = await fetchItem(itemId);
@@ -64,11 +91,37 @@ const addToCartListener = () => {
       const { id: sku, title: name, price: salePrice } = itemInfo;
       const cartElement = createCartItemElement({ sku, name, salePrice });
       cartList.appendChild(cartElement);
+      updateLocalStorage();
+      updateTotalPrice();
     });
   });
 };
 
+document.querySelector('.empty-cart')
+.addEventListener('click', () => {
+  while (cartList.firstChild) {
+    cartList.removeChild(cartList.lastChild);
+  }
+  updateTotalPrice();
+  updateLocalStorage();
+});
+
+const isLoading = (argument) => {
+  if (argument) { 
+    const items = document.querySelector('.items');
+    const element = document.createElement('div');
+    element.classList.add('loading');
+    element.innerHTML = 'carregando...';
+    items.appendChild(element);
+  } else { 
+    document.querySelector('.loading').remove();
+  }
+};
+
 window.onload = async () => { 
+  isLoading(true);
   await addProducts();
+  isLoading(false);
   addToCartListener();
+  getFromLocalStorage();
 };
