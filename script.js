@@ -32,8 +32,7 @@ const updateTotalPrice = () => {
   const valueElement = document.querySelector('.total-price');
   let totalValue = 0;
   cartList.childNodes.forEach((item) => {
-    const itemString = item.innerHTML.split(' ');
-    const value = itemString[itemString.length - 1].substring(1);
+    const value = item.innerHTML.split('$')[1];
     totalValue += parseFloat(value, 10);
   });
   valueElement.innerHTML = Math.round(totalValue * 100) / 100;
