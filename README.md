@@ -1,7 +1,6 @@
 <p align="center">
   <img src="./TrybeCart.svg" />
 </p>
-<br>
 
 # Sobre o projeto
 Adicione produtos vindo de uma API, ao seu carrinho, que lhe mostra o valor total da compra
